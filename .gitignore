@@ -49,6 +49,8 @@ Thumbs.db
 
 # Quarto rendering artifacts
 /.quarto/
+*_files/
+_site/
 
 # Output artifacts — uncomment lines below based on your preference
 # *.rds

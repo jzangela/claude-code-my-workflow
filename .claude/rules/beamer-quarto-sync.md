@@ -1,60 +1,40 @@
 ---
 paths:
-  - "Slides/**/*.tex"
   - "Quarto/**/*.qmd"
 ---
 
-# Beamer → Quarto Auto-Sync Rule (MANDATORY)
+# Quarto Authoring Conventions
 
-**Every edit to a Beamer `.tex` file MUST be immediately synced to the corresponding Quarto `.qmd` file — automatically, without the user asking.** This is non-negotiable.
+**All lecture content is authored in Quarto `.qmd` files.** This project does not use Beamer.
 
-## The Rule
+## Slide Structure
 
-When you modify a Beamer `.tex` file, you MUST also apply the equivalent change to the Quarto `.qmd` (if it exists) **in the same task**, before reporting completion. Do NOT wait to be asked. Do NOT just "flag the drift." Just do it.
+- One `.qmd` file per lecture: `Quarto/Lecture01_Topic.qmd`
+- Use level-2 headings (`##`) for slide titles
+- Use horizontal rules (`---`) only when needed for untitled slides
+- Keep one concept per slide; split rather than overcrowd
 
-## Lecture Mapping
+## Math Notation
 
-<!-- Customize this table for your lectures -->
-| Lecture | Beamer | Quarto |
-|---------|--------|--------|
-| 1 | `Slides/Lecture1_Topic.tex` | `Quarto/Lecture1_Topic.qmd` |
-| 2 | `Slides/Lecture2_Topic.tex` | `Quarto/Lecture2_Topic.qmd` |
-<!-- Add rows as you create lectures -->
+- Use `$...$` for inline math, `$$...$$` for display math
+- Consistent notation across all lectures (see CLAUDE.md visual standards)
+- Common symbols: $Y_i$ (outcome), $X_i$ (predictor), $\beta$ (coefficients), $\varepsilon_i$ (error)
+- Always define notation before first use on a slide
 
-## Workflow (Every Time)
+## Citations
 
-1. Apply fix to Beamer `.tex`
-2. **Immediately** apply equivalent fix to Quarto `.qmd`
-3. Compile Beamer (3-pass xelatex)
-4. Render Quarto (`./scripts/sync_to_docs.sh LectureN`)
-5. Only then report task complete
+- Use `@key` format, referencing `Bibliography_base.bib`
+- Place citations in parentheses: `[@author2024]`
+- Verify every citation key exists in the `.bib` file before committing
 
-## LaTeX → Quarto Translation Reference
+## Progressive Builds
 
-| Beamer | Quarto Equivalent |
-| ------ | ----------------- |
-| `\muted{text}` | `[text]{style="color: #525252;"}` |
-| `\key{text}` | `[**text**]{.emorygold}` |
-| `\textcolor{positive}{text}` | `[text]{.positive}` |
-| `\textcolor{negative}{text}` | `[text]{.negative}` |
-| `\item text` | `- text` |
-| `\begin{highlightbox}` | `::: {.highlightbox}` |
-| `\begin{methodbox}` | `::: {.methodbox}` |
-| `$formula$` | `$formula$` (same) |
+- Do NOT use `::: {.incremental}` or `. . .` fragments
+- Instead, use multiple slides to build up content progressively
+- Use color emphasis and visual hierarchy for attention guidance
 
-## When NOT to Sync
+## Code Blocks
 
-- Quarto file doesn't exist yet
-- Change is LaTeX-only infrastructure (preamble, theme files)
-- Explicitly told to skip Quarto sync
-
-## Enforcement
-
-Before marking any Beamer editing task as complete, check:
-> "Did I also update the Quarto file?"
-
-If the answer is no and a Quarto file exists, **you are NOT done.**
-
-## When to Update This Table
-
-After creating a new Quarto translation, add it to the mapping table above.
+- Use `{r}` code chunks for R demonstrations
+- Set `echo: true` for teaching code, `echo: false` for figure-only output
+- Always include `#| fig-alt:` for accessibility

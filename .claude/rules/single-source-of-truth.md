@@ -2,68 +2,53 @@
 paths:
   - "Figures/**/*"
   - "Quarto/**/*.qmd"
-  - "Slides/**/*.tex"
 ---
 
-# Single Source of Truth: Enforcement Protocol
+# Single Source of Truth: Quarto-First Workflow
 
-**The Beamer `.tex` file is the authoritative source for ALL content.** Everything else is derived.
+**The Quarto `.qmd` file is the authoritative source for ALL lecture content.** Everything else is derived.
 
 ## The SSOT Chain
 
 ```
-Beamer .tex (SOURCE OF TRUTH)
-  ├── extract_tikz.tex → PDF → SVGs (derived)
-  ├── Quarto .qmd → HTML (derived)
+Quarto .qmd (SOURCE OF TRUTH)
+  ├── RevealJS HTML (derived, via quarto render)
   ├── Bibliography_base.bib (shared)
-  └── Figures/LectureN/*.rds → plotly charts (data source)
+  ├── Figures/ (R-generated or manually created)
+  └── docs/ (deployed output)
 
-NEVER edit derived artifacts independently.
-ALWAYS propagate changes from source → derived.
+NEVER edit derived artifacts (HTML, docs/) independently.
+ALWAYS make changes in the .qmd source.
 ```
 
 ---
 
-## TikZ Freshness Protocol (MANDATORY)
+## Figure Freshness Protocol
 
-**Before using ANY TikZ SVG in a Quarto slide, verify it matches the current Beamer source.**
+**Before referencing any figure in a Quarto slide, verify it is current.**
 
-### Diff-Check Procedure
-
-1. Read the TikZ block from the Beamer `.tex` file
-2. Read the corresponding block from `Figures/LectureN/extract_tikz.tex`
-3. Compare EVERY coordinate, label, color, opacity, and anchor point
-4. If ANY difference exists: update `extract_tikz.tex` from Beamer, recompile, regenerate SVGs
-5. Only then reference the SVG in the QMD
-
-### When to Re-Extract
-
-Re-extract ALL TikZ diagrams when:
-- The Beamer `.tex` file has been modified since last extraction
-- Starting a new Quarto translation
-- Any TikZ-related quality issue is reported
-- Before any commit that includes QMD changes
+1. If the figure is R-generated: ensure the R script has been re-run since last data/code change
+2. If the figure is manually created: ensure it matches the current slide content
+3. Use `.svg` format when possible; `.png` at 300 DPI as fallback
 
 ---
 
-## Environment Parity (MANDATORY)
+## CSS Class Parity
 
-**Every Beamer environment MUST have a CSS equivalent before translation begins.**
+**Every styled element must have a corresponding CSS class defined in the theme.**
 
-1. Scan the Beamer source for all custom environments
-2. Check each against your theme SCSS file
-3. If ANY environment is missing from SCSS, create it BEFORE translating
+1. Before using a custom class (e.g., `.definition`, `.keypoint`), verify it exists in the theme SCSS
+2. If a class is missing, create it before using it in slides
+3. Maintain the class registry in CLAUDE.md
 
 ---
 
 ## Content Fidelity Checklist
 
 ```
-[ ] Frame count: Beamer frames == Quarto slides
-[ ] Math check: every equation appears with identical notation
-[ ] Citation check: every \cite has a @key in Quarto
-[ ] Environment check: every Beamer box has CSS equivalent
-[ ] Figure check: every \includegraphics has SVG or plotly equivalent
-[ ] No added content: Quarto does not invent slides not in Beamer
-[ ] No dropped content: every Beamer idea appears in Quarto
+[ ] Math check: every equation renders correctly in MathJax
+[ ] Citation check: every @key resolves in Bibliography_base.bib
+[ ] Figure check: every referenced image exists in Figures/
+[ ] CSS check: every custom class is defined in theme
+[ ] No orphan slides: every slide connects to the lecture narrative
 ```

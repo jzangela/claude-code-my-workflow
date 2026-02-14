@@ -23,16 +23,16 @@ Repeat
 ## I Ask You When
 
 - **Design forks:** "Option A (fast) vs. Option B (robust). Which?"
-- **Code ambiguity:** "Spec unclear on X. Assume Y?"
-- **Replication edge case:** "Just missed tolerance. Investigate?"
+- **Content ambiguity:** "Spec unclear on X. Assume Y?"
 - **Scope question:** "Also refactor Y while here, or focus on X?"
+- **Pedagogy choice:** "Include this derivation or keep it intuitive?"
 
 ---
 
 ## I Just Execute When
 
 - Code fix is obvious (bug, pattern application)
-- Verification (tolerance checks, tests, compilation)
+- Verification (rendering, tests, compilation)
 - Documentation (logs, commits)
 - Plotting (per established standards)
 - Deployment (after you approve, I ship automatically)
@@ -48,26 +48,22 @@ Repeat
 
 ---
 
-## Non-Negotiables (Customize These)
+## Non-Negotiables
 
-<!-- Replace with YOUR project's locked-in preferences -->
-
-- [YOUR PATH CONVENTION] (e.g., `here::here()` for R, relative paths for LaTeX)
-- [YOUR SEED CONVENTION] (e.g., `set.seed()` once at top for stochastic code)
-- [YOUR FIGURE STANDARDS] (e.g., white bg, 300 DPI, custom theme)
-- [YOUR COLOR PALETTE] (e.g., institutional colors)
-- [YOUR TOLERANCE THRESHOLDS] (e.g., 1e-6 for point estimates)
+- **Path convention:** `here::here()` for R scripts; relative paths in Quarto
+- **Seed convention:** `set.seed(12345)` once at top of any stochastic R script
+- **Figure standards:** White background, 300 DPI, `.svg` preferred, minimal theme
+- **Color palette:** Navy (#003366), Steel Blue (#4682B4), Gray (#6B7280), Gold (#D4A843)
+- **No fragments:** Never use incremental/fragment builds in slides
 
 ---
 
 ## Preferences
 
-<!-- Fill in as you discover your working style -->
-
-**Visual:** [How you want figures/plots handled]
-**Reporting:** [Concise bullets? Detailed prose? Details on request?]
+**Visual:** Clean, publication-ready figures. Minimal chart junk. Consistent palette.
+**Reporting:** Concise bullets. Details on request.
 **Session logs:** Always (post-plan, incremental, end-of-session)
-**Replication:** [How strict? Flag near-misses?]
+**Notation:** Consistent across lectures — $Y_i$, $X_i$, $\beta$, $\varepsilon_i$
 
 ---
 

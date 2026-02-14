@@ -13,7 +13,7 @@ paths:
 
 ## 1. Reproducibility
 
-- `set.seed()` called ONCE at top (YYYYMMDD format)
+- `set.seed(12345)` called ONCE at top
 - All packages loaded at top via `library()` (not `require()`)
 - All paths relative to repository root
 - `dir.create(..., recursive = TRUE)` for output directories
@@ -34,10 +34,11 @@ paths:
 ## 4. Visual Identity
 
 ```r
-# --- Your institutional palette ---
-primary_blue  <- "#012169"
-primary_gold  <- "#f2a900"
-accent_gray   <- "#525252"
+# --- Project palette ---
+navy          <- "#003366"
+steel_blue    <- "#4682B4"
+gray          <- "#6B7280"
+gold          <- "#D4A843"
 positive_green <- "#15803d"
 negative_red  <- "#b91c1c"
 ```
@@ -47,15 +48,15 @@ negative_red  <- "#b91c1c"
 theme_custom <- function(base_size = 14) {
   theme_minimal(base_size = base_size) +
     theme(
-      plot.title = element_text(face = "bold", color = primary_blue),
+      plot.title = element_text(face = "bold", color = navy),
       legend.position = "bottom"
     )
 }
 ```
 
-### Figure Dimensions for Beamer
+### Figure Dimensions for RevealJS
 ```r
-ggsave(filepath, width = 12, height = 5, bg = "transparent")
+ggsave(filepath, width = 10, height = 6, dpi = 300, bg = "white")
 ```
 
 ## 5. RDS Data Pattern
@@ -71,7 +72,7 @@ saveRDS(result, file.path(out_dir, "descriptive_name.rds"))
 <!-- Add your field-specific pitfalls here -->
 | Pitfall | Impact | Prevention |
 |---------|--------|------------|
-| Missing `bg = "transparent"` | White boxes on slides | Always include in ggsave() |
+| Missing `bg = "white"` | Transparent bg on dark themes | Always include `bg = "white"` in ggsave() |
 | Hardcoded paths | Breaks on other machines | Use relative paths |
 
 ## 7. Line Length & Mathematical Exceptions
@@ -99,7 +100,7 @@ saveRDS(result, file.path(out_dir, "descriptive_name.rds"))
 [ ] set.seed() once at top
 [ ] All paths relative
 [ ] Functions documented (Roxygen)
-[ ] Figures: transparent bg, explicit dimensions
+[ ] Figures: white bg, 300 DPI, explicit dimensions
 [ ] RDS: every computed object saved
 [ ] Comments explain WHY not WHAT
 ```
