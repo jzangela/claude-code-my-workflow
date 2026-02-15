@@ -1,0 +1,589 @@
+---
+title: "Introduction to Regression Analysis"
+subtitle: "Lecture 1: From Questions to Lines"
+date: today
+bibliography: ../Bibliography_base.bib
+format:
+  revealjs:
+    theme: emory-clean.scss
+    slide-number: true
+    chalkboard: false
+    preview-links: auto
+    code-fold: false
+    code-overflow: wrap
+    highlight-style: github
+    width: 1280
+    height: 720
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+```{r}
+#| label: setup
+#| echo: false
+
+# --- Project palette ---
+navy          <- "#003366"
+steel_blue    <- "#4682B4"
+gray          <- "#6B7280"
+gold          <- "#D4A843"
+positive_green <- "#15803d"
+negative_red  <- "#b91c1c"
+
+library(ggplot2)
+
+theme_lecture <- function(base_size = 16) {
+  theme_minimal(base_size = base_size) +
+    theme(
+      plot.title = element_text(face = "bold", color = navy, size = 18),
+      plot.subtitle = element_text(color = gray, size = 14),
+      axis.title = element_text(color = navy, size = 14),
+      axis.text = element_text(color = gray, size = 12),
+      panel.grid.minor = element_blank(),
+      panel.grid.major = element_line(color = "#E5E7EB"),
+      legend.position = "bottom"
+    )
+}
+
+# Simulated dataset: study hours -> exam scores
+set.seed(12345)
+n <- 50
+hours <- round(runif(n, 1, 10), 1)
+scores <- 45 + 5.2 * hours + rnorm(n, 0, 8)
+scores <- pmin(pmax(round(scores), 0), 100)
+exam_data <- data.frame(hours = hours, score = scores)
+```
+
+
+# Part I: Why Regression?
+
+
+## The Central Question
+
+Across psychology and social sciences, we constantly ask:
+
+- Does therapy duration predict symptom improvement?
+- Does class size affect student achievement?
+- Does sleep quality relate to cognitive performance?
+
+::: {.keybox}
+**Regression analysis** gives us a rigorous framework to answer questions about relationships between variables.
+:::
+
+
+## A Motivating Example
+
+Suppose we survey 50 students and record:
+
+- **Hours studied** for an exam ($X$)
+- **Exam score** ($Y$)
+
+Does studying more lead to higher scores?
+
+How much higher?
+
+Can we **predict** a score from study time?
+
+
+## Examining the Data
+
+```{r}
+#| label: fig-scatter-raw
+#| echo: false
+#| fig-alt: "Scatter plot of exam scores versus study hours for 50 students"
+#| fig-width: 10
+#| fig-height: 5.5
+
+ggplot(exam_data, aes(x = hours, y = score)) +
+  geom_point(color = steel_blue, size = 3, alpha = 0.7) +
+  labs(
+    title = "Exam Scores vs. Study Hours",
+    subtitle = "n = 50 students",
+    x = "Hours Studied",
+    y = "Exam Score"
+  ) +
+  theme_lecture()
+```
+
+
+## From Correlation to Prediction
+
+We already know tools for association:
+
+- **Correlation** ($r$) tells us *strength* and *direction*
+- But it does not give us a **prediction rule**
+
+We want more:
+
+- For a student who studies 6 hours, what score do we **predict**?
+- How much does each additional hour of study **add** to the score?
+
+*Think about it: if correlation already tells us about relationships, why is it not enough?*
+
+
+## What Regression Does
+
+Regression goes beyond correlation by providing:
+
+1. [**Direction**]{.hi} — which variable predicts which?
+2. [**Magnitude**]{.hi} — how much does $Y$ change per unit of $X$?
+3. [**Prediction**]{.hi} — given $X$, what is our best guess for $Y$?
+4. [**Uncertainty**]{.hi} — how confident are we?
+
+
+## Real-World Applications
+
+:::: {.columns}
+
+::: {.column width="50%"}
+### Psychology
+- Dose-response in therapy
+- Predictors of well-being
+- Cognitive decline with age
+:::
+
+::: {.column width="50%"}
+### Social Sciences
+- Income and education
+- Policy effects on outcomes
+- Demographic predictors of attitudes
+:::
+
+::::
+
+Regression is the *workhorse* of quantitative social science.
+
+
+## We Want to Draw a Line
+
+```{r}
+#| label: fig-scatter-line
+#| echo: false
+#| fig-alt: "Scatter plot with a fitted regression line"
+#| fig-width: 10
+#| fig-height: 5.5
+
+ggplot(exam_data, aes(x = hours, y = score)) +
+  geom_point(color = steel_blue, size = 3, alpha = 0.7) +
+  geom_smooth(method = "lm", formula = y ~ x, se = FALSE,
+              color = navy, linewidth = 1.2) +
+  labs(
+    title = "The \"Best\" Line Through the Data",
+    x = "Hours Studied",
+    y = "Exam Score"
+  ) +
+  theme_lecture()
+```
+
+
+## The Fundamental Question
+
+::: {.methodbox}
+**How do we find the "best" line?**
+
+- What does "best" even mean?
+- How do we choose the intercept and slope?
+- How do we know if the line is any good?
+:::
+
+These are the questions regression answers.
+
+
+# Part II: The Simple Linear Model
+
+
+## The Model
+
+We write the relationship as:
+
+::: {.eqbox}
+$$Y_i = \beta_0 + \beta_1 X_i + \varepsilon_i, \qquad i = 1, \ldots, n$$
+:::
+
+Where:
+
+- $Y_i$ = outcome (exam score) for person $i$
+- $X_i$ = predictor (hours studied) for person $i$
+- $\beta_0$ = **intercept** (value of $Y$ when $X = 0$)
+- $\beta_1$ = **slope** (change in $Y$ per unit change in $X$)
+- $\varepsilon_i$ = **error term** (everything else)
+
+::: {.softbox}
+**Key assumption:** This model assumes a *linear* relationship between $X$ and $Y$. We will examine this and other assumptions formally in a later lecture.
+:::
+
+
+## The Population Regression Line
+
+```{r}
+#| label: fig-population-line
+#| echo: false
+#| fig-alt: "Scatter plot showing population regression line with error terms"
+#| fig-width: 10
+#| fig-height: 5.5
+
+model_early <- lm(score ~ hours, data = exam_data)
+plot_data <- exam_data
+plot_data$fitted <- predict(model_early)
+
+ggplot(plot_data, aes(x = hours, y = score)) +
+  geom_segment(aes(xend = hours, yend = fitted),
+               color = gold, alpha = 0.5, linewidth = 0.6) +
+  geom_point(color = steel_blue, size = 3, alpha = 0.7) +
+  geom_smooth(method = "lm", formula = y ~ x, se = FALSE,
+              color = navy, linewidth = 1.2) +
+  labs(
+    title = "Each Point Deviates from the Line",
+    subtitle = "Gold segments = deviations (related to errors)",
+    x = "Hours Studied",
+    y = "Exam Score"
+  ) +
+  theme_lecture()
+```
+
+
+## The Intercept: $\beta_0$
+
+::: {.highlightbox}
+$\beta_0$ is the predicted value of $Y$ when $X = 0$.
+:::
+
+- In our example: the expected exam score for someone who studies **zero** hours
+- Often the intercept is not substantively meaningful
+  - $\rightarrow$ Is "zero hours of study" realistic?
+- But it is **mathematically necessary** to position the line
+
+
+## The Slope: $\beta_1$
+
+::: {.highlightbox}
+$\beta_1$ is the change in $Y$ for a **one-unit increase** in $X$.
+:::
+
+- In our example: each additional hour of study is associated with a $\beta_1$-point increase in exam score
+- This is the quantity we usually care about most
+- $\beta_1 > 0$: positive relationship
+- $\beta_1 < 0$: negative relationship
+- $\beta_1 = 0$: no linear relationship
+
+
+## The Error Term: $\varepsilon_i$
+
+$\varepsilon_i$ captures **everything that affects $Y_i$ but is not in our model**:
+
+- Student ability, motivation, prior knowledge
+- Test difficulty, luck, measurement error
+- Any other unmeasured factor
+
+::: {.keybox}
+The error term is what makes this a **statistical** model rather than a deterministic equation.
+:::
+
+*What variables might be hiding in $\varepsilon_i$ for our study-hours example?*
+
+
+## Population vs. Sample
+
+::: {.methodbox}
+**We can never observe** $\beta_0$, $\beta_1$, or $\varepsilon_i$ **directly.** They are population parameters.
+:::
+
+What we **can** do:
+
+- Collect a sample of data $(X_i, Y_i)$
+- **Estimate** the parameters: $\hat{\beta}_0$ and $\hat{\beta}_1$
+- Compute **fitted values** and **residuals**
+
+The hat notation (e.g., $\hat{\beta}$) means "estimated from data."
+
+
+## The Fitted Model
+
+Our estimated line:
+
+::: {.eqbox}
+$$\hat{Y}_i = \hat{\beta}_0 + \hat{\beta}_1 X_i$$
+:::
+
+- $\hat{Y}_i$ = **predicted** score for person $i$
+- No error term here — this is our **best guess**, not the truth
+
+
+## Residuals vs. Errors {.smaller}
+
+Two related but different concepts:
+
+| | Symbol | Meaning | Observable? |
+|--|--------|---------|-------------|
+| **Error** | $\varepsilon_i = Y_i - \beta_0 - \beta_1 X_i$ | True deviation from population line | No |
+| **Residual** | $e_i = Y_i - \hat{Y}_i$ | Observed deviation from fitted line | [**Yes**]{.positive} |
+
+::: {.keybox}
+Residuals are our **window** into the unobservable errors. We use them to check assumptions and diagnose problems.
+:::
+
+
+# Part III: Ordinary Least Squares
+
+
+## The Goal: Find the Best Line
+
+We need values for $\hat{\beta}_0$ and $\hat{\beta}_1$ that make the line fit the data well.
+
+But what does "fit well" mean?
+
+We want the residuals $e_i = Y_i - \hat{Y}_i$ to be **small**.
+
+
+## Why Not Just Minimize the Sum of Residuals?
+
+If we try $\min \sum_{i=1}^n e_i$:
+
+- Positive residuals (above the line) cancel with negative ones (below)
+- A terrible line could have residuals that sum to zero!
+
+::: {.methodbox}
+We need to prevent positive and negative residuals from canceling each other out.
+:::
+
+
+## The OLS Solution: Minimize Squared Residuals
+
+::: {.methodbox}
+**Ordinary Least Squares (OLS)** finds $\hat{\beta}_0$ and $\hat{\beta}_1$ that minimize:
+
+$$\text{RSS} = \sum_{i=1}^{n} e_i^2 = \sum_{i=1}^{n} (Y_i - \hat{\beta}_0 - \hat{\beta}_1 X_i)^2$$
+:::
+
+- Squaring makes all terms positive
+- Larger deviations are penalized more heavily
+- There is a unique, closed-form solution
+
+
+## Visualizing OLS
+
+```{r}
+#| label: fig-ols-squares
+#| echo: false
+#| fig-alt: "Scatter plot with regression line and squared residuals shown as areas"
+#| fig-width: 10
+#| fig-height: 5.5
+
+# Show a subset for clarity
+sub_idx <- c(3, 8, 15, 22, 30, 38, 44)
+sub_data <- exam_data[sub_idx, ]
+sub_data$fitted <- predict(lm(score ~ hours, data = exam_data),
+                           newdata = sub_data)
+
+ggplot(exam_data, aes(x = hours, y = score)) +
+  geom_rect(data = sub_data,
+            aes(xmin = hours,
+                xmax = hours + abs(score - fitted) / 15,
+                ymin = pmin(score, fitted),
+                ymax = pmax(score, fitted)),
+            fill = gold, alpha = 0.25, color = gold) +
+  geom_segment(data = sub_data,
+               aes(xend = hours, yend = fitted),
+               color = negative_red, linewidth = 0.8) +
+  geom_point(color = steel_blue, size = 3, alpha = 0.7) +
+  geom_smooth(method = "lm", formula = y ~ x, se = FALSE,
+              color = navy, linewidth = 1.2) +
+  labs(
+    title = "OLS Minimizes the Total Area of the Squares",
+    subtitle = "Red segments = residuals; Gold squares = squared residuals",
+    x = "Hours Studied",
+    y = "Exam Score"
+  ) +
+  theme_lecture()
+```
+
+
+## The OLS Formulas
+
+The solution:
+
+::: {.eqbox}
+$$\hat{\beta}_1 = \frac{\sum_{i=1}^n (X_i - \bar{X})(Y_i - \bar{Y})}{\sum_{i=1}^n (X_i - \bar{X})^2} = \frac{\text{Cov}(X, Y)}{\text{Var}(X)}$$
+:::
+
+::: {.eqbox}
+$$\hat{\beta}_0 = \bar{Y} - \hat{\beta}_1 \bar{X}$$
+:::
+
+We'll derive these in a future lecture. For now, note the intuition.
+
+
+## Intuition for $\hat{\beta}_1$
+
+$$\hat{\beta}_1 = \frac{\text{Cov}(X, Y)}{\text{Var}(X)}$$
+
+- **Numerator:** How much $X$ and $Y$ move together
+- **Denominator:** How much $X$ varies on its own
+- If $X$ and $Y$ move together a lot relative to $X$'s own spread, the slope is steep
+
+
+## A Key Property
+
+::: {.keybox}
+The OLS regression line always passes through the point $(\bar{X}, \bar{Y})$.
+:::
+
+This follows directly from $\hat{\beta}_0 = \bar{Y} - \hat{\beta}_1 \bar{X}$:
+
+$$\hat{Y}\big|_{X=\bar{X}} = \hat{\beta}_0 + \hat{\beta}_1 \bar{X} = (\bar{Y} - \hat{\beta}_1 \bar{X}) + \hat{\beta}_1 \bar{X} = \bar{Y}$$
+
+The line is "anchored" at the means of both variables.
+
+
+# Part IV: Regression in R
+
+
+## The `lm()` Function
+
+R's built-in function for linear models:
+
+```{r}
+#| label: lm-basic
+#| echo: true
+#| eval: false
+
+# Basic syntax
+model <- lm(outcome ~ predictor, data = your_data)
+
+# Our example
+model <- lm(score ~ hours, data = exam_data)
+```
+
+- Formula syntax: `Y ~ X` reads as "Y predicted by X"
+- Always specify `data = ` to keep things clean
+
+
+## Our Example Dataset
+
+```{r}
+#| label: show-data
+
+# First 8 rows
+head(exam_data, 8)
+```
+
+
+## Fitting the Model
+
+```{r}
+#| label: fit-model
+
+model <- lm(score ~ hours, data = exam_data)
+model
+```
+
+R tells us: $\hat{\beta}_0 =$ `r round(coef(model)[1], 1)` and $\hat{\beta}_1 =$ `r round(coef(model)[2], 1)`
+
+
+## The Full Summary
+
+```{r}
+#| label: model-summary
+
+summary(model)
+```
+
+
+## Reading the Output {.smaller}
+
+| Component | What It Tells You |
+|-----------|------------------|
+| `(Intercept)` estimate | $\hat{\beta}_0$ — predicted score at 0 hours |
+| `hours` estimate | $\hat{\beta}_1$ — change in score per hour |
+| `Std. Error` | Precision of each estimate |
+| `t value` | Test statistic for $H_0: \beta = 0$ |
+| `Pr(>|t|)` | p-value for that test |
+| `Multiple R-squared` | Proportion of variance explained |
+| `Residual standard error` | Typical size of a residual |
+
+
+## Interpreting the Coefficients
+
+```{r}
+#| label: coef-extract
+#| echo: false
+b0 <- round(coef(model)[1], 1)
+b1 <- round(coef(model)[2], 1)
+```
+
+::: {.resultbox}
+**Intercept** ($\hat{\beta}_0$ = `r b0`): A student who studies 0 hours is predicted to score `r b0` points.
+
+**Slope** ($\hat{\beta}_1$ = `r b1`): Each additional hour of study is associated with a `r b1`-point increase in exam score.
+:::
+
+Note: "associated with" — we are not making a causal claim (yet).
+
+*A student studied 7 hours. What score would you predict? How confident are you in that prediction?*
+
+
+## Plotting the Results
+
+```{r}
+#| label: fig-final-plot
+#| fig-alt: "Scatter plot with regression line and confidence band"
+#| fig-width: 10
+#| fig-height: 5
+
+ggplot(exam_data, aes(x = hours, y = score)) +
+  geom_point(color = steel_blue, size = 3, alpha = 0.7) +
+  geom_smooth(method = "lm", formula = y ~ x, se = TRUE,
+              color = navy, fill = steel_blue,
+              alpha = 0.15, linewidth = 1.2) +
+  labs(
+    title = "Exam Score vs. Study Hours",
+    subtitle = paste0("Fitted line: Score = ", b0, " + ", b1, " × Hours"),
+    x = "Hours Studied",
+    y = "Exam Score"
+  ) +
+  theme_lecture()
+```
+
+
+# Part V: Wrap-Up
+
+
+## What We Learned Today
+
+::: {.keybox}
+1. Regression gives us a **prediction rule** and **quantifies** relationships
+2. The simple linear model: $Y_i = \beta_0 + \beta_1 X_i + \varepsilon_i$
+3. OLS finds the line that **minimizes squared residuals**
+4. In R: `lm(Y ~ X, data = df)` fits the model
+5. The slope $\hat{\beta}_1$ tells us how much $Y$ changes per unit of $X$
+:::
+
+
+## What's Coming Next
+
+- **Lecture 2:** Assumptions of the linear model — when does OLS work well?
+- **Lecture 3:** Inference — confidence intervals and hypothesis tests for $\beta$
+- **Lecture 4:** Multiple regression — more than one predictor
+
+
+## Practice
+
+Try this on your own:
+
+1. Load a dataset (e.g., `mtcars` in R)
+2. Pick an outcome and a predictor
+3. Run `lm()` and interpret the coefficients
+4. Make a scatter plot with the fitted line
+
+```{r}
+#| label: practice-example
+#| eval: false
+
+# Example with built-in data
+car_model <- lm(mpg ~ wt, data = mtcars)
+summary(car_model)
+```
+
+What does the slope mean in context?

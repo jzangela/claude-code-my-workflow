@@ -85,12 +85,18 @@ Rscript scripts/quality_score.R Quarto/file.qmd
 | Class | Effect | Use Case |
 |-------|--------|----------|
 | `.smaller` | 85% font size | Dense content or equation-heavy slides |
-| `.definition` | Blue left-border box | Formal definitions and theorems |
-| `.keypoint` | Navy background, white text | Key takeaways |
-| `.example` | Light gray background | Worked examples |
-| `.warning` | Gold left-border box | Common mistakes and caveats |
+| `.keybox` | Gold background, gold left border | Key takeaways |
+| `.highlightbox` | Steel blue background, blue left border | Highlights, definitions |
+| `.methodbox` | Navy background tint, blue left border | Methods, formal criteria |
+| `.assumptionbox` | Gold border all sides | Assumptions, conditions |
+| `.resultbox` | Gold background, gold border | Results, findings |
+| `.eqbox` | Light blue tint | Displayed equations |
+| `.softbox` | Light gold, italic | Soft commentary |
+| `.quotebox` | Gold left border, quote mark | Quotations |
 | `.positive` | Green bold text | Correct interpretations |
 | `.negative` | Red bold text | Incorrect interpretations |
+| `.hi` | Navy bold | Inline emphasis |
+| `.hi-gold` | Gold bold | Secondary inline emphasis |
 
 ---
 
